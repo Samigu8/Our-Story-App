@@ -15,11 +15,11 @@ model User {
 }
 
 model Memory {
-  id        Int      @id @default(autoincrement())
-  title     String
+  id          Int      @id @default(autoincrement())
+  title       String
   description String?
-  imageUrl  String?
-  date      DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  imageUrl    String?
+  date        DateTime @default(now())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
 }
