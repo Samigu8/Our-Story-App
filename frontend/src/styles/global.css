@@ -1,0 +1,13 @@
+@import '../../styles/index.css';
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: #fafafa;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
