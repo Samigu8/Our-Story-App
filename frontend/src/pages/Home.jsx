@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Image, Heart } from 'lucide-react';
-import { API_URL } from './config';
+import { API_URL } from '../config';
 
 const Home = () => {
   const [counts, setCounts] = useState({

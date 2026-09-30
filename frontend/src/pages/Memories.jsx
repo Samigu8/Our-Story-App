@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Upload, Image as ImageIcon, Trash2, X } from 'lucide-react';
-import { API_URL } from './config';
+import { API_URL } from '../config';
 
 function PhotoTile({ photo, index, onDelete }) {
   const gradients = [

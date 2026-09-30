@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Edit, Trash2, Plus, Save, X } from 'lucide-react';
-import { API_URL } from './config';
+import { API_URL } from '../config';
 
 function TimelineCard({ event, onEdit, onDelete }) {
   return (
