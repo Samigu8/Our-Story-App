@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, LoaderCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { API_URL } from '../services/api';
 import MemoryCard from '../components/MemoryCard/MemoryCard.jsx';
 
@@ -10,11 +11,23 @@ export default function Memories() {
   const [statusMessage, setStatusMessage] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [form, setForm] = useState({ caption: '' });
 
   useEffect(() => {
     fetchPhotos();
   }, []);
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreview('');
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedImage);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedImage]);
 
   const fetchPhotos = async () => {
     try {
@@ -87,6 +100,7 @@ export default function Memories() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       setStatusMessage('Please correct the form before uploading.');
+      toast.error('Please correct the highlighted fields.');
       return;
     }
 
@@ -106,17 +120,22 @@ export default function Memories() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to upload photo.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
       setForm({ caption: '' });
       setSelectedImage(null);
+      setImagePreview('');
       setFormErrors({});
       setIsUploading(false);
       await fetchPhotos();
       setStatusMessage('Photo uploaded.');
+      toast.success('Photo uploaded.');
     } catch (error) {
-      setStatusMessage(error?.message || 'Unable to upload photo right now. Please try again.');
+      const message = error?.message || 'Unable to upload photo right now. Please try again.';
+      setStatusMessage(message);
+      toast.error(message);
     } finally {
       setIsUploadingImage(false);
     }
@@ -128,13 +147,16 @@ export default function Memories() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete photo.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
       setPhotos((prev) => prev.filter((photo) => photo.id !== id));
       setStatusMessage('Photo deleted.');
+      toast.success('Photo deleted.');
     } catch {
       setStatusMessage('Unable to delete photo right now.');
+      toast.error('Unable to delete photo right now.');
     }
   };
 
@@ -194,10 +216,14 @@ export default function Memories() {
                 }}
               />
             </label>
+            {imagePreview && (
+              <img src={imagePreview} alt="Selected memory preview" className="mt-3 max-h-56 w-full rounded-xl object-cover" />
+            )}
             {formErrors.imageUrl && <p className="text-red-600 mt-1" role="alert">{formErrors.imageUrl}</p>}
 
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
-              <button type="submit" disabled={isUploadingImage} className="w-full sm:w-auto bg-pink-500 text-white px-5 py-2 rounded-full hover:bg-pink-600 disabled:bg-pink-300">
+              <button type="submit" disabled={isUploadingImage} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-500 text-white px-5 py-2 rounded-full hover:bg-pink-600 disabled:bg-pink-300">
+                {isUploadingImage && <LoaderCircle className="w-4 h-4 animate-spin" />}
                 {isUploadingImage ? 'Uploading image...' : 'Upload'}
               </button>
               <button
@@ -205,6 +231,7 @@ export default function Memories() {
                 onClick={() => {
                   setIsUploading(false);
                   setSelectedImage(null);
+                  setImagePreview('');
                   setFormErrors({});
                 }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-5 py-2 rounded-full hover:bg-gray-300"

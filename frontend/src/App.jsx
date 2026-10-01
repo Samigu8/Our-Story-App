@@ -7,10 +7,12 @@ import Home from './pages/Home.jsx';
 import LoveNotes from './pages/LoveNotes.jsx';
 import Memories from './pages/Memories.jsx';
 import Timeline from './pages/Timeline.jsx';
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
       <Navbar />
       <main className="flex-1">
         <Routes>

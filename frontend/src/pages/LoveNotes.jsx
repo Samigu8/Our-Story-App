@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Heart, Plus, MoreVertical, Pencil, Trash2, X } from 'lucide-react';
+import { Heart, Plus, MoreVertical, Pencil, Trash2, X, LoaderCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { API_URL } from '../services/api';
 
 function LoveNote({ note, onEdit, onDelete }) {
@@ -57,6 +58,7 @@ export default function LoveNotes() {
   const [notes, setNotes] = useState([]);
   const [isWriting, setIsWriting] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
@@ -143,6 +145,7 @@ export default function LoveNotes() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       setStatusMessage('Please correct the form before saving.');
+      toast.error('Please correct the highlighted fields.');
       return;
     }
 
@@ -151,6 +154,7 @@ export default function LoveNotes() {
     const method = isEdit ? 'PUT' : 'POST';
 
     try {
+      setIsSaving(true);
       const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -165,14 +169,19 @@ export default function LoveNotes() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to save love note.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
       await fetchNotes();
       resetForm();
       setStatusMessage(isEdit ? 'Love note updated.' : 'Love note added.');
+      toast.success(isEdit ? 'Love note updated.' : 'Love note added.');
     } catch {
       setStatusMessage('Unable to save love note right now. Please try again.');
+      toast.error('Unable to save love note right now. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -200,6 +209,7 @@ export default function LoveNotes() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete love note.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
@@ -208,8 +218,10 @@ export default function LoveNotes() {
         resetForm();
       }
       setStatusMessage('Love note deleted.');
+      toast.success('Love note deleted.');
     } catch {
       setStatusMessage('Unable to delete love note right now.');
+      toast.error('Unable to delete love note right now.');
     }
   };
 
@@ -309,7 +321,10 @@ export default function LoveNotes() {
             {formErrors.color && <p className="text-red-600 mt-1" role="alert">{formErrors.color}</p>}
 
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
-              <button type="submit" className="w-full sm:w-auto bg-pink-500 text-white px-5 py-2 rounded-full hover:bg-pink-600">Save Note</button>
+              <button type="submit" disabled={isSaving} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-500 text-white px-5 py-2 rounded-full hover:bg-pink-600 disabled:bg-pink-300">
+                {isSaving && <LoaderCircle className="w-4 h-4 animate-spin" />}
+                {isSaving ? 'Saving...' : 'Save Note'}
+              </button>
               <button
                 type="button"
                 onClick={() => {

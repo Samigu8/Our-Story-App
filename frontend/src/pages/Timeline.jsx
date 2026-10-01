@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Save, X } from 'lucide-react';
+import { Plus, Save, X, LoaderCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { API_URL } from '../services/api';
 import TimelineCard from '../components/Timeline/TimelineCard.jsx';
 
@@ -12,12 +13,25 @@ export default function Timeline() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [form, setForm] = useState({ title: '', date: '', description: '', imageUrl: '' });
 
   useEffect(() => {
     fetchTimelineEvents();
   }, []);
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreview('');
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedImage);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedImage]);
 
   const fetchTimelineEvents = async () => {
     try {
@@ -74,6 +88,7 @@ export default function Timeline() {
   const resetForm = () => {
     setForm({ title: '', date: '', description: '', imageUrl: '' });
     setSelectedImage(null);
+    setImagePreview('');
     setIsUploadingImage(false);
     setFormErrors({});
     setIsCreating(false);
@@ -121,6 +136,7 @@ export default function Timeline() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       setStatusMessage('Please correct the form before saving.');
+      toast.error('Please correct the highlighted fields.');
       return;
     }
 
@@ -129,6 +145,7 @@ export default function Timeline() {
     const method = isEditMode ? 'PUT' : 'POST';
 
     try {
+      setIsSaving(true);
       let imageUrl = form.imageUrl.trim();
       if (selectedImage) {
         setIsUploadingImage(true);
@@ -151,16 +168,21 @@ export default function Timeline() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to save timeline event.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
       await fetchTimelineEvents();
       resetForm();
       setStatusMessage(isEditMode ? 'Timeline event updated.' : 'Timeline event added.');
+      toast.success(isEditMode ? 'Timeline event updated.' : 'Timeline event added.');
     } catch (error) {
-      setStatusMessage(error?.message || 'Unable to save timeline event right now. Please try again.');
+      const message = error?.message || 'Unable to save timeline event right now. Please try again.';
+      setStatusMessage(message);
+      toast.error(message);
     } finally {
       setIsUploadingImage(false);
+      setIsSaving(false);
     }
   };
 
@@ -179,6 +201,7 @@ export default function Timeline() {
       imageUrl: event.imageUrl || '',
     });
     setSelectedImage(null);
+    setImagePreview('');
     setFormErrors({});
     setStatusMessage('');
   };
@@ -194,6 +217,7 @@ export default function Timeline() {
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete timeline event.');
         setStatusMessage(message);
+        toast.error(message);
         return;
       }
 
@@ -202,8 +226,10 @@ export default function Timeline() {
         resetForm();
       }
       setStatusMessage('Timeline event deleted.');
+      toast.success('Timeline event deleted.');
     } catch {
       setStatusMessage('Unable to delete timeline event right now.');
+      toast.error('Unable to delete timeline event right now.');
     }
   };
 
@@ -282,6 +308,13 @@ export default function Timeline() {
                   }}
                 />
               </label>
+              {(imagePreview || form.imageUrl) && (
+                <img
+                  src={imagePreview || form.imageUrl}
+                  alt="Timeline event preview"
+                  className="max-h-56 w-full rounded-xl object-cover"
+                />
+              )}
               {form.imageUrl && !selectedImage && (
                 <p className="text-sm text-gray-600">Current image is saved. Choose a file only if you want to replace it.</p>
               )}
@@ -289,9 +322,9 @@ export default function Timeline() {
             </div>
 
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
-              <button type="submit" disabled={isUploadingImage} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 disabled:bg-blue-300">
-                <Save className="w-4 h-4" />
-                {isUploadingImage ? 'Uploading image...' : 'Save'}
+              <button type="submit" disabled={isSaving} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 disabled:bg-blue-300">
+                {isSaving ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isUploadingImage ? 'Uploading image...' : isSaving ? 'Saving...' : 'Save'}
               </button>
               <button type="button" onClick={cancelForm} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-5 py-2 rounded-full hover:bg-gray-300">
                 <X className="w-4 h-4" />
