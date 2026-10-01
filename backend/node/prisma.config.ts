@@ -1,15 +1,12 @@
-import dotenv from 'dotenv';
-import { defineConfig, env } from 'prisma/config';
-
-dotenv.config({ path: 'prisma/.env' });
+import { defineConfig } from "@prisma/config";
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
-  migrations: {
-    path: 'prisma/migrations',
-  },
   datasource: {
-    url: env('DATABASE_URL'),
-    shadowDatabaseUrl: env('DIRECT_DATABASE_URL'),
+    db: {
+      adapter: process.env.DIRECT_DATABASE_URL,   // direct Neon connection (no -pooler)
+    },
+  },
+  client: {
+    accelerateUrl: process.env.DATABASE_URL,      // pooled Neon connection (-pooler)
   },
 });
