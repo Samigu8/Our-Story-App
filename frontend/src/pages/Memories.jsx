@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Upload, X, LoaderCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { API_URL } from '../services/api';
+import { API_URL, authHeaders } from '../services/api';
 import MemoryCard from '../components/MemoryCard/MemoryCard.jsx';
 
 export default function Memories() {
@@ -31,7 +31,7 @@ export default function Memories() {
 
   const fetchPhotos = async () => {
     try {
-      const response = await fetch(`${API_URL}/memories/photos`);
+      const response = await fetch(`${API_URL}/memories/photos`, { headers: authHeaders() });
       if (!response.ok) {
         setStatusMessage('Unable to load memories right now.');
         return;
@@ -67,6 +67,7 @@ export default function Memories() {
 
     const uploadResponse = await fetch(`${API_URL}/uploads`, {
       method: 'POST',
+      headers: authHeaders(),
       body: formData,
     });
 
@@ -110,7 +111,7 @@ export default function Memories() {
 
       const response = await fetch(`${API_URL}/memories/photos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           caption: form.caption.trim(),
           imageUrl,
@@ -143,7 +144,7 @@ export default function Memories() {
 
   const deletePhoto = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/memories/photos/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/memories/photos/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete photo.');
         setStatusMessage(message);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Save, X, LoaderCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { API_URL } from '../services/api';
+import { API_URL, authHeaders } from '../services/api';
 import TimelineCard from '../components/Timeline/TimelineCard.jsx';
 
 export default function Timeline() {
@@ -35,7 +35,7 @@ export default function Timeline() {
 
   const fetchTimelineEvents = async () => {
     try {
-      const response = await fetch(`${API_URL}/timeline`);
+      const response = await fetch(`${API_URL}/timeline`, { headers: authHeaders() });
       if (!response.ok) {
         setStatusMessage('Unable to load timeline events right now.');
         return;
@@ -102,6 +102,7 @@ export default function Timeline() {
 
     const uploadResponse = await fetch(`${API_URL}/uploads`, {
       method: 'POST',
+      headers: authHeaders(),
       body: formData,
     });
 
@@ -161,7 +162,7 @@ export default function Timeline() {
 
       const response = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
 
@@ -213,7 +214,7 @@ export default function Timeline() {
 
   const deleteEvent = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/timeline/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/timeline/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete timeline event.');
         setStatusMessage(message);

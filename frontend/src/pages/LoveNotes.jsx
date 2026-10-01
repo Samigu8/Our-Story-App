@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Heart, Plus, MoreVertical, Pencil, Trash2, X, LoaderCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { API_URL } from '../services/api';
+import { API_URL, authHeaders } from '../services/api';
 
 function LoveNote({ note, onEdit, onDelete }) {
   return (
@@ -70,7 +70,7 @@ export default function LoveNotes() {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch(`${API_URL}/lovenotes`);
+      const response = await fetch(`${API_URL}/lovenotes`, { headers: authHeaders() });
       if (!response.ok) {
         setStatusMessage('Unable to load love notes right now.');
         return;
@@ -157,7 +157,7 @@ export default function LoveNotes() {
       setIsSaving(true);
       const response = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: form.message.trim(),
           author: form.author.trim(),
@@ -205,7 +205,7 @@ export default function LoveNotes() {
 
   const deleteNote = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/lovenotes/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/lovenotes/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!response.ok) {
         const message = await parseMessage(response, 'Unable to delete love note.');
         setStatusMessage(message);

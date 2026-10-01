@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import { useAuth } from '../../context/auth.js';
 
 export default function Navbar() {
   const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
@@ -69,6 +71,11 @@ export default function Navbar() {
             </Link>
             </div>
           </div>
+          {isAuthenticated ? (
+            <button type="button" onClick={logout} className="self-start rounded-full px-3 py-2 text-sm text-gray-600 hover:bg-pink-50 hover:text-pink-600 sm:self-auto">Sign out</button>
+          ) : location.pathname !== '/login' ? (
+            <Link to="/login" className="self-start rounded-full bg-pink-500 px-4 py-2 text-sm text-white hover:bg-pink-600 sm:self-auto">Sign in</Link>
+          ) : null}
         </div>
       </div>
     </nav>

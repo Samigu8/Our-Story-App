@@ -9,3 +9,8 @@ const api = axios.create({
 export { API_URL };
 
 export default api;
+
+export function authHeaders() {
+  const token = localStorage.getItem('our-story-token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Image, Heart } from 'lucide-react';
-import { API_URL } from '../services/api';
+import { API_URL, authHeaders } from '../services/api';
 
 const Home = () => {
   const [counts, setCounts] = useState({
@@ -12,7 +12,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchCount = async (endpoint) => {
-      const response = await fetch(`${API_URL}${endpoint}`);
+      const response = await fetch(`${API_URL}${endpoint}`, { headers: authHeaders() });
       if (!response.ok) {
         throw new Error('Count request failed');
       }
