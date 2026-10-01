@@ -60,17 +60,17 @@ function parseId(value) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-function registerCrud(router, model, validate, singular, responseKey) {
+function registerCrud(router, model, validate, singular, responseKey, validateRequest) {
   router.get("/", async (_req, res) => res.json(await prisma[model].findMany({ orderBy: { id: "asc" } })));
 
-  router.post("/", async (req, res) => {
+  router.post("/", validateRequest, async (req, res) => {
     const result = validate(req.body);
     if (Object.keys(result.errors).length) return res.status(400).json(validationError(result.errors));
     const record = await prisma[model].create({ data: result.value });
     res.status(201).json({ message: `${singular} created.`, [responseKey]: record });
   });
 
-  router.put("/:id", async (req, res) => {
+  router.put("/:id", validateRequest, async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ message: `Please provide a valid ${singular.toLowerCase()} ID.` });
     const result = validate(req.body);

@@ -1,11 +1,12 @@
 const express = require("express");
 const upload = require("../middleware/upload");
 const cloudinary = require("../config/cloudinary");
+const { validateBody, uploadSchema } = require("../middleware/validate");
 
 const router = express.Router();
 const allowedFolders = new Set(["timeline", "memories"]);
 
-router.post("/", upload.single("file"), async (req, res) => {
+router.post("/", upload.single("file"), validateBody(uploadSchema), async (req, res) => {
   const folder = typeof req.body.folder === "string" ? req.body.folder.trim().toLowerCase() : "";
   if (!allowedFolders.has(folder)) {
     return res.status(400).json({ message: "Upload folder must be timeline or memories." });

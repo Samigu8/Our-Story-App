@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const memoryRoutes = require("./routes/memoryRoutes");
 const { timelineRoutes, loveNoteRoutes, photoRoutes } = require("./routes/storyRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const auth = require("./middleware/authMiddleware");
 
 const app = express();
 app.use(cors());
@@ -14,10 +15,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
 app.use("/memories", memoryRoutes);
-app.use("/timeline", timelineRoutes);
-app.use("/lovenotes", loveNoteRoutes);
-app.use("/memories/photos", photoRoutes);
-app.use("/uploads", uploadRoutes);
+app.use("/timeline", auth, timelineRoutes);
+app.use("/lovenotes", auth, loveNoteRoutes);
+app.use("/memories/photos", auth, photoRoutes);
+app.use("/uploads", auth, uploadRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Our Story API running" });

@@ -11,6 +11,7 @@ exports.register = async (req, res) => {
 
   const user = await prisma.user.create({
     data: { email, password: hashed },
+    select: { id: true, email: true, createdAt: true },
   });
 
   res.json({ message: "User registered", user });
