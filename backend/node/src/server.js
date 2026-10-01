@@ -8,6 +8,7 @@ const memoryRoutes = require("./routes/memoryRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
 app.use("/memories", memoryRoutes);
