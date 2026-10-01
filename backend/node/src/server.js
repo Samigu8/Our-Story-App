@@ -24,6 +24,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Our Story API running" });
 });
 
+app.get("/health", (_req, res) => {
+  res.status(200).send("OK");
+});
+
 app.use((error, _req, res, _next) => {
   console.error(error);
   res.status(500).json({ message: "The service is temporarily unavailable." });
