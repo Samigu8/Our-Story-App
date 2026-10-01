@@ -24,5 +24,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Our Story API running" });
 });
 
+app.use((error, _req, res, _next) => {
+  console.error(error);
+  res.status(500).json({ message: "The service is temporarily unavailable." });
+});
+
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
