@@ -1,17 +1,15 @@
-import { defineConfig } from "@prisma/config";
+import dotenv from 'dotenv';
+import { defineConfig, env } from 'prisma/config';
+
+dotenv.config({ path: 'prisma/.env' });
 
 export default defineConfig({
-  datasource: {
-    db: {
-      // REQUIRED for prisma migrate deploy
-      url: process.env.DIRECT_DATABASE_URL,      
-
-      // Optional but recommended for Prisma 7
-      adapter: process.env.DIRECT_DATABASE_URL,
-    },
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
   },
-  client: {
-    // Pooled connection for Prisma Client at runtime
-    accelerateUrl: process.env.DATABASE_URL,
+  datasource: {
+    url: env('DATABASE_URL'),
+    shadowDatabaseUrl: env('DIRECT_DATABASE_URL'),
   },
 });
