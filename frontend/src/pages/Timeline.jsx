@@ -337,10 +337,11 @@ export default function Timeline() {
 
         {/* Timeline Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {timelineEvents.map((event) => (
+          {timelineEvents.map((event, index) => (
             <TimelineCard
               key={event.id}
               event={event}
+              index={index}
               onEdit={startEdit}
               onDelete={deleteEvent}
             />

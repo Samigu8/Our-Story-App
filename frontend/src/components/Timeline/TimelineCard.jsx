@@ -1,8 +1,8 @@
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 
-export default function TimelineCard({ event, onEdit, onDelete }) {
+export default function TimelineCard({ event, onEdit, onDelete, index = 0 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+    <div className="timeline-card bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow overflow-hidden" style={{ animationDelay: `${index * 70}ms` }}>
       {event.imageUrl ? (
         <img src={event.imageUrl} alt={event.title} className="aspect-video w-full object-cover" />
       ) : (
