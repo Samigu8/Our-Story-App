@@ -23,3 +23,26 @@ model Memory {
   userId      Int
   user        User     @relation(fields: [userId], references: [id])
 }
+
+model TimelineEvent {
+  id          Int    @id @default(autoincrement())
+  title       String
+  date        String
+  description String
+  imageUrl    String?
+}
+
+model LoveNote {
+  id      Int    @id @default(autoincrement())
+  message String
+  author  String
+  date    String
+  color   String
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  caption   String
+  imageUrl  String
+  createdAt DateTime @default(now())
+}

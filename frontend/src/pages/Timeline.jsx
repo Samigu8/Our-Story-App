@@ -80,34 +80,22 @@ export default function Timeline() {
     setEditingId(null);
   };
 
-  const uploadImageToS3 = async (file, folder) => {
-    const presignResponse = await fetch(`${API_URL}/uploads/presign`, {
+  const uploadImage = async (file, folder) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    const uploadResponse = await fetch(`${API_URL}/uploads`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName: file.name,
-        contentType: file.type,
-        folder,
-      }),
-    });
-
-    if (!presignResponse.ok) {
-      const message = await parseMessage(presignResponse, 'Unable to prepare image upload.');
-      throw new Error(message);
-    }
-
-    const { uploadUrl, fileUrl } = await presignResponse.json();
-
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file,
+      body: formData,
     });
 
     if (!uploadResponse.ok) {
-      throw new Error('Image upload failed. Please try again.');
+      const message = await parseMessage(uploadResponse, 'Unable to upload image.');
+      throw new Error(message);
     }
 
+    const { fileUrl } = await uploadResponse.json();
     return fileUrl;
   };
 
@@ -144,7 +132,7 @@ export default function Timeline() {
       let imageUrl = form.imageUrl.trim();
       if (selectedImage) {
         setIsUploadingImage(true);
-        imageUrl = await uploadImageToS3(selectedImage, 'timeline');
+        imageUrl = await uploadImage(selectedImage, 'timeline');
       }
 
       const requestBody = {
